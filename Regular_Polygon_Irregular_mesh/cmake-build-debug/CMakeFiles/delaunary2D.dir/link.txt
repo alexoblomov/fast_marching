@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/delaunary2D.dir/main.cpp.o  -o delaunary2D /usr/lib/x86_64-linux-gnu/libCGAL.so.13.0.1 /usr/lib/x86_64-linux-gnu/libgmp.so /usr/lib/x86_64-linux-gnu/libgmpxx.so /usr/lib/x86_64-linux-gnu/libmpfr.so 
