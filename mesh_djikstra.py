@@ -20,108 +20,74 @@ import networkx as nx
 def create_weighted_graph(graph):
     weighted_graph = []
     for edge in graph[1]:
-       #weight =({'weight' : 1/(distance.euclidean(graph[0][edge[0]], graph[0][edge[1]]) + 1)})
        weight =({'weight' : distance.euclidean(graph[0][edge[0]], graph[0][edge[1]])})
 
        weighted_graph.append((edge[0],edge[1], weight))
     
     return weighted_graph
 
-def add_connectivity(graph, to_connect):
-    return 0
-# load and visualize mesh
-mesh = pymesh.load_mesh("poly_4.off");
-plt.triplot(mesh.vertices[:,0], mesh.vertices[:,1], mesh.faces, 'ko-', lw = 0.5, alpha=0.5, ms = 0.7)
+def add_connectivity(graph, weighted_graph, connect):
+    nodes_to_connect = np.where(np.isin(graph[0][:,0:2], connect[:,0:2])[:,0])[0]
+    weight = ({'weight' : 100000})
+    row = 0
+    num_rows = np.shape(connect)[0]
+    while row < num_rows:
+        weighted_graph.append((nodes_to_connect[row], nodes_to_connect[row+1], weight))
+        row = row + 2
+        
+    return weighted_graph
 
-# load connectivity data
-#connected_nodes = 
-
-# convert mesh to graph 
-graph = pymesh.mesh_to_graph(mesh)
-# add weights to account for irregularity of mesh
-weighted_graph = create_weighted_graph(graph)
-
-# add connectivity
-connect = np.loadtxt("poly_4_connectivity.txt")
-for row in connect:
-    print(row, row+1)
-
-for row in A:
-    print(row)
-# create networkx graph
-G = nx.from_edgelist(weighted_graph)
-
-
-# load sources
-sources = np.loadtxt("poly_boundary_4.txt")
-src = np.where(np.isin(graph[0][:,0:2], sources[:,0:2])[:,0])[0]
-
-
-
-graph_edge_example = np.array([[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]])
-graph_edge_example = ((0,1,{'weight':1} ),(0,2, {'weight' : 1}), 
-                       (0,3, {'weight' : 0.2}),
-                       (1,2, {'weight' : 1}),
-                              (1,3, {'weight':1}),
-                              (2,3, {'weight' : 1}))
-nodes = np.array([[0,0],[6,0],[3,5],[3,2]])
-
-# Dijkstra
-G_triangle = nx.from_edgelist(graph_edge_example)
-length_t, path_t = nx.multi_source_dijkstra(G_triangle,{3})
-
-# add edges connecting triangle
-#length_t_connected, path_t_connected = nx.multi_source_dijkstra(G_triangle,{3})
-
-
-length, path = nx.multi_source_dijkstra(G,set(src))
-
-
-#TEST
-
-#convert lengths into array for triplot
-
-dist_triangle = np.zeros(4)
-for key, value in length_t.items():
-    dist_triangle[key]= value
+for i in np.arange(4,16,2):
+    mesh_name = "poly_" + str(i) + ".off"
+    mesh_boundary = "poly_boundary_" + str(i) + ".txt"
+    mesh_connectivity = "poly_connectivity_" + str(i) + ".txt"
+    # load and visualize mesh
+    mesh = pymesh.load_mesh(mesh_name);
+#    plt.triplot(mesh.vertices[:,0], mesh.vertices[:,1], mesh.faces, 'ko-', lw = 0.5, alpha=0.5, ms = 0.7)
     
-faces = [[0, 1, 3],[0,2,3], [1,2,3]]
-#plot
-fig1, ax1 = plt.subplots()
-ax1.set_aspect('equal')
-#tcf = ax1.plot(nodes[3,0], nodes[3,1] ,'r*', markersize=11)
+    # convert mesh to graph 
+    graph = pymesh.mesh_to_graph(mesh)
+    # add weights to account for irregularity of mesh
+    weighted_graph = create_weighted_graph(graph)
     
-tcf = ax1.tricontourf(nodes[:,0], nodes[:,1], faces, dist_triangle)
-fig1.colorbar(tcf)
-plt.show()
-
-
-
-
-#####
-
-#convert lengths into array for triplot
-# =============================================================================
-# dist_list=[]
-# temp = []
-# for key, value in length.items():
-#     temp = [key,value]
-#     dist_list.append(temp)
-#     
-# dist = np.array(dist_list)
-# =============================================================================
-dist= np.zeros(np.shape(graph[0])[0]) 
-for key, value in length.items():
-    dist[key]= value
-
-marker_colors = ['r*', 'b*', 'm*', 'y*', 'k*', 'c*']
-color = 0
-#plot
-fig1, ax1 = plt.subplots()
-ax1.set_aspect('equal')
-for i in np.arange(len(src)):
-    tcf = ax1.plot(mesh.vertices[src[i]][0], mesh.vertices[src[i]][1] ,'r*', markersize=11)
-
-tcf = ax1.tricontourf(mesh.vertices[:,0], mesh.vertices[:,1], mesh.faces, dist)
-
-plt.show()
+    # add connectivity
+    connect = np.loadtxt(mesh_connectivity)
+    weighted_graph_with_connectivity = add_connectivity(graph, weighted_graph.copy(), connect)
+    
+    # create networkx graph
+    G = nx.from_edgelist(weighted_graph)
+    G_prime = nx.from_edgelist(weighted_graph_with_connectivity)
+    
+    # load sources
+    sources = np.loadtxt(mesh_boundary)
+    src = np.where(np.isin(graph[0][:,0:2], sources[:,0:2])[:,0])[0]    
+    
+    # run Dijkstra
+    length, path = nx.multi_source_dijkstra(G,set(src))
+    length_prime, path_prime = nx.multi_source_dijkstra(G_prime, set(src))
+    
+    #convert lengths into array for triplot
+    dist= np.zeros(np.shape(graph[0])[0]) 
+    for key, value in length.items():
+        dist[key]= value
+    
+    #plot
+    fig1, ax1 = plt.subplots()
+    ax1.set_aspect('equal')
+    for i in np.arange(len(src)):
+        tcf = ax1.plot(mesh.vertices[src[i]][0], mesh.vertices[src[i]][1] ,'r*', markersize=11)
+    tcf = ax1.tricontourf(mesh.vertices[:,0], mesh.vertices[:,1], mesh.faces, dist)
+    plt.title('Dijkstra without connectivity')
+    plt.show()
+    
+    dist_prime= np.zeros(np.shape(graph[0])[0]) 
+    for key, value in length_prime.items():
+        dist_prime[key]= value
+        
+    fig1, ax1 = plt.subplots()
+    ax1.set_aspect('equal')
+    for i in np.arange(len(src)):
+        tcf = ax1.plot(mesh.vertices[src[i]][0], mesh.vertices[src[i]][1] ,'r*', markersize=11)
+    tcf = ax1.tricontourf(mesh.vertices[:,0], mesh.vertices[:,1], mesh.faces, dist_prime)
+    plt.title('Dijkstra with connectivity')
+    plt.show()
