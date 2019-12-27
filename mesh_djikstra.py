@@ -12,32 +12,12 @@ import pymesh
 import matplotlib.tri as mtri
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
-from scipy.spatial import distance
 #graph imports
 import networkx as nx
 
-# edge weights: to represent distances in irregular mesh
-def create_weighted_graph(graph):
-    weighted_graph = []
-    for edge in graph[1]:
-       weight =({'weight' : distance.euclidean(graph[0][edge[0]], graph[0][edge[1]])})
+from utils import create_weighted_graph, add_connectivity
 
-       weighted_graph.append((edge[0],edge[1], weight))
-    
-    return weighted_graph
-
-def add_connectivity(graph, weighted_graph, connect):
-    nodes_to_connect = np.where(np.isin(graph[0][:,0:2], connect[:,0:2])[:,0])[0]
-    weight = ({'weight' : 100000})
-    row = 0
-    num_rows = np.shape(connect)[0]
-    while row < num_rows:
-        weighted_graph.append((nodes_to_connect[row], nodes_to_connect[row+1], weight))
-        row = row + 2
-        
-    return weighted_graph
-
-for i in np.arange(4,16,2):
+for i in np.arange(6,8,2):
     mesh_name = "poly_" + str(i) + ".off"
     mesh_boundary = "poly_boundary_" + str(i) + ".txt"
     mesh_connectivity = "poly_connectivity_" + str(i) + ".txt"
@@ -52,10 +32,11 @@ for i in np.arange(4,16,2):
     
     # add connectivity
     connect = np.loadtxt(mesh_connectivity)
-    weighted_graph_with_connectivity = add_connectivity(graph, weighted_graph.copy(), connect)
+    weighted_graph_with_connectivity = add_connectivity(np.copy(graph[0]), weighted_graph.copy(), connect)
     
     # create networkx graph
     G = nx.from_edgelist(weighted_graph)
+    
     G_prime = nx.from_edgelist(weighted_graph_with_connectivity)
     
     # load sources
