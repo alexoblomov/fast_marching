@@ -44,13 +44,18 @@ for i in np.arange(6,8,2):
     src = np.where(np.isin(graph[0][:,0:2], sources[:,0:2])[:,0])[0]    
     
     # run Dijkstra
-    length, path = nx.multi_source_dijkstra(G,set(src))
+    length, path = nx.multi_source_dijkstra(G, set(src))
     length_prime, path_prime = nx.multi_source_dijkstra(G_prime, set(src))
     
     #convert lengths into array for triplot
     dist= np.zeros(np.shape(graph[0])[0]) 
     for key, value in length.items():
         dist[key]= value
+        
+    dist_prime= np.zeros(np.shape(graph[0])[0]) 
+    for key, value in length_prime.items():
+        dist_prime[key]= value
+        
     
     #plot
     fig1, ax1 = plt.subplots()
@@ -61,10 +66,7 @@ for i in np.arange(6,8,2):
     plt.title('Dijkstra without connectivity')
     plt.show()
     
-    dist_prime= np.zeros(np.shape(graph[0])[0]) 
-    for key, value in length_prime.items():
-        dist_prime[key]= value
-        
+    
     fig1, ax1 = plt.subplots()
     ax1.set_aspect('equal')
     for i in np.arange(len(src)):
