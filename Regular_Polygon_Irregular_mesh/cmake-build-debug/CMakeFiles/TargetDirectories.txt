@@ -1,3 +1,0 @@
-/home/alex/CLionProjects/Regular_Polygon_Irregular_mesh/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/alex/CLionProjects/Regular_Polygon_Irregular_mesh/cmake-build-debug/CMakeFiles/delaunary2D.dir
-/home/alex/CLionProjects/Regular_Polygon_Irregular_mesh/cmake-build-debug/CMakeFiles/edit_cache.dir
