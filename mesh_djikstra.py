@@ -11,19 +11,20 @@ import numpy as np
 import pymesh
 import matplotlib.tri as mtri
 import matplotlib.pyplot as plt
+from matplotlib import transforms
 import matplotlib.colors as mcolors
 #graph imports
 import networkx as nx
 
 from utils import create_weighted_graph, add_connectivity
 
-for i in np.arange(6,8,2):
+for i in np.arange(4,12,2):
     mesh_name = "poly_" + str(i) + ".off"
     mesh_boundary = "poly_boundary_" + str(i) + ".txt"
     mesh_connectivity = "poly_connectivity_" + str(i) + ".txt"
     # load and visualize mesh
-    mesh = pymesh.load_mesh(mesh_name);
-#    plt.triplot(mesh.vertices[:,0], mesh.vertices[:,1], mesh.faces, 'ko-', lw = 0.5, alpha=0.5, ms = 0.7)
+    mesh = pymesh.load_mesh(mesh_name)
+    plt.triplot(mesh.vertices[:,0], mesh.vertices[:,1], mesh.faces, 'ko-', lw = 0.5, alpha=0.5, ms = 0.7)
     
     # convert mesh to graph 
     graph = pymesh.mesh_to_graph(mesh)
@@ -44,7 +45,7 @@ for i in np.arange(6,8,2):
     src = np.where(np.isin(graph[0][:,0:2], sources[:,0:2])[:,0])[0]    
     
     # run Dijkstra
-    length, path = nx.multi_source_dijkstra(G, set(src))
+    length, path = nx.multi_source_dijkstra(G,set(src))
     length_prime, path_prime = nx.multi_source_dijkstra(G_prime, set(src))
     
     #convert lengths into array for triplot
@@ -62,15 +63,23 @@ for i in np.arange(6,8,2):
     ax1.set_aspect('equal')
     for i in np.arange(len(src)):
         tcf = ax1.plot(mesh.vertices[src[i]][0], mesh.vertices[src[i]][1] ,'r*', markersize=11)
+    tcf = plt.triplot(mesh.vertices[:,0], mesh.vertices[:,1], mesh.faces, 'ko-', lw = 0.5, alpha=0.5, ms = 0.7)
     tcf = ax1.tricontourf(mesh.vertices[:,0], mesh.vertices[:,1], mesh.faces, dist)
     plt.title('Dijkstra without connectivity')
-    plt.show()
+    title = "dijkstra_poly_" + str(i) + "_srcboundary"+ ".png"
+    plt.axis('off')
+    plt.savefig(title, bbox_inches = 'tight')
     
     
     fig1, ax1 = plt.subplots()
     ax1.set_aspect('equal')
     for i in np.arange(len(src)):
         tcf = ax1.plot(mesh.vertices[src[i]][0], mesh.vertices[src[i]][1] ,'r*', markersize=11)
+    tcf = ax1.plot(mesh.vertices[3][0], mesh.vertices[3][1] ,'r*', markersize=11)
+    tcf = plt.triplot(mesh.vertices[:,0], mesh.vertices[:,1], mesh.faces, 'ko-', lw = 0.5, alpha=0.5, ms = 0.7)
     tcf = ax1.tricontourf(mesh.vertices[:,0], mesh.vertices[:,1], mesh.faces, dist_prime)
     plt.title('Dijkstra with connectivity')
-    plt.show()
+    title = "dijkstra_connected_poly_" + str(i) + "_srcboundary"+ ".png"
+    plt.axis('off')
+    plt.savefig(title, bbox_inches = 'tight')
+    
