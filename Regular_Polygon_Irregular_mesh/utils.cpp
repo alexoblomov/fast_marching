@@ -56,7 +56,7 @@ void generate_points_on_segment(float x, float x_prime, float y, float y_prime, 
         py = y + i * dy;
         points.emplace_back(px, py, 0);
         point3D p{px, py, 0};
-        boundary_points.emplace_back(p);
+        boundary_points.push_back(p);
     }
 }
 
@@ -81,18 +81,16 @@ void trace_regular_polygon(int degree, float x_min, float x_max, float y_min, fl
     float interior_angle = 360. / degree;
     float x = x_max / 2;
     float y = y_max;
-    float x_prime = 0;
-    float y_prime = 0;
+    float x_prime = x_min;
+    float y_prime = y_max;
     for (int i = 0; i < degree; i++) // should be <
     {
         rotate_xy(x, y, x_prime, y_prime, interior_angle);
         generate_points_on_segment(x, x_prime, y, y_prime, num_boundary_points, points, boundary_points);
-        generate_points_in_triangle(x_center, x, x_prime, y_center, y, y_prime, num_interior_points,
-                                    points);
+        generate_points_in_triangle(x_center, x, x_prime, y_center, y, y_prime, num_interior_points, points);
         x = x_prime;
         y = y_prime;
     }
-
 }
 
 
