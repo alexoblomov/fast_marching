@@ -1,5 +1,5 @@
 # fast_marching
-Python code: (mesh_djikstra.py) runs Dijkstra algorithm for irregular meshes of Regular even n-gons. Nb. the full version (github installation) of PyMesh must be installed as certain functions are not installed with pip.
+Python code: runs Dijkstra algorithm for irregular meshes of Regular even n-gons. Nb. the full version (github installation) of PyMesh must be installed as certain functions are not installed with pip.
 
 Regular Polygon Irregular Mesh directory: contains C++ code to generate the irregular triangle meshes. CGAL must be installed in order to run this code.
 
